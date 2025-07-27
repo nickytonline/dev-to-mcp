@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "WebFetch(domain:developers.forem.com)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm view:*)"
+    ],
+    "deny": []
+  }
+}

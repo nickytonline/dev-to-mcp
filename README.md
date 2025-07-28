@@ -48,6 +48,40 @@ npm run format
 npm run format:check
 ```
 
+## Docker
+
+Build and run the MCP server using Docker:
+
+```bash
+# Build the Docker image
+docker build -t dev-to-mcp .
+
+# Run the container
+docker run -p 3000:3000 dev-to-mcp
+```
+
+The server will be available at `http://localhost:3000/mcp` for MCP connections.
+
+### Docker Compose
+
+For easier development, you can also use Docker Compose:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  dev-to-mcp:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+```
+
+```bash
+docker-compose up --build
+```
+
 ## API Endpoints
 
 All endpoints use the public dev.to API (`https://dev.to/api`) and do not require authentication.

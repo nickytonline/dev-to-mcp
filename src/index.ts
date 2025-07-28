@@ -7,17 +7,10 @@ import { z } from "zod";
 import { DevToAPI } from "./devto-api.ts";
 
 const getServer = () => {
-  const server = new McpServer(
-    {
-      name: "dev-to-mcp",
-      version: "1.0.0",
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    },
-  );
+  const server = new McpServer({
+    name: "dev-to-mcp",
+    version: "1.0.0",
+  });
 
   const devToAPI = new DevToAPI();
 
@@ -25,17 +18,34 @@ const getServer = () => {
     "get_articles",
     {
       title: "Get Articles",
-      description: "Get articles from dev.to. Can filter by username, tag, or other parameters.",
+      description:
+        "Get articles from dev.to. Can filter by username, tag, or other parameters.",
       inputSchema: {
         username: z.string().optional().describe("Filter articles by username"),
         tag: z.string().optional().describe("Filter articles by tag"),
-        top: z.number().optional().describe("Number representing the number of days since publication for top articles (1, 7, 30, or infinity)"),
-        page: z.number().optional().default(1).describe("Pagination page number (default: 1)"),
-        per_page: z.number().optional().default(30).describe("Number of articles per page (default: 30, max: 1000)"),
-        state: z.enum(["fresh", "rising", "all"]).optional().describe("Filter by article state"),
+        top: z
+          .number()
+          .optional()
+          .describe(
+            "Number representing the number of days since publication for top articles (1, 7, 30, or infinity)",
+          ),
+        page: z
+          .number()
+          .optional()
+          .default(1)
+          .describe("Pagination page number (default: 1)"),
+        per_page: z
+          .number()
+          .optional()
+          .default(30)
+          .describe("Number of articles per page (default: 30, max: 1000)"),
+        state: z
+          .enum(["fresh", "rising", "all"])
+          .optional()
+          .describe("Filter by article state"),
       },
     },
-    async (args) => await devToAPI.getArticles(args)
+    async (args) => await devToAPI.getArticles(args),
   );
 
   server.registerTool(
@@ -45,7 +55,10 @@ const getServer = () => {
       description: "Get a specific article by ID or path",
       inputSchema: {
         id: z.number().optional().describe("Article ID"),
-        path: z.string().optional().describe('Article path (e.g., "username/article-slug")'),
+        path: z
+          .string()
+          .optional()
+          .describe('Article path (e.g., "username/article-slug")'),
       },
     },
     async (args) => {
@@ -53,7 +66,7 @@ const getServer = () => {
         throw new Error("Either id or path must be provided");
       }
       return await devToAPI.getArticle(args);
-    }
+    },
   );
 
   server.registerTool(
@@ -71,7 +84,7 @@ const getServer = () => {
         throw new Error("Either id or username must be provided");
       }
       return await devToAPI.getUser(args);
-    }
+    },
   );
 
   server.registerTool(
@@ -80,11 +93,19 @@ const getServer = () => {
       title: "Get Tags",
       description: "Get popular tags from dev.to",
       inputSchema: {
-        page: z.number().optional().default(1).describe("Pagination page number (default: 1)"),
-        per_page: z.number().optional().default(10).describe("Number of tags per page (default: 10, max: 1000)"),
+        page: z
+          .number()
+          .optional()
+          .default(1)
+          .describe("Pagination page number (default: 1)"),
+        per_page: z
+          .number()
+          .optional()
+          .default(10)
+          .describe("Number of tags per page (default: 10, max: 1000)"),
       },
     },
-    async (args) => await devToAPI.getTags(args)
+    async (args) => await devToAPI.getTags(args),
   );
 
   server.registerTool(
@@ -96,7 +117,7 @@ const getServer = () => {
         article_id: z.number().describe("Article ID to get comments for"),
       },
     },
-    async (args) => await devToAPI.getComments(args)
+    async (args) => await devToAPI.getComments(args),
   );
 
   server.registerTool(
@@ -106,12 +127,25 @@ const getServer = () => {
       description: "Search articles using query parameters",
       inputSchema: {
         q: z.string().describe("Search query"),
-        page: z.number().optional().default(1).describe("Pagination page number (default: 1)"),
-        per_page: z.number().optional().default(30).describe("Number of articles per page (default: 30, max: 1000)"),
-        search_fields: z.string().optional().describe("Comma-separated list of fields to search (title, body_text, tag_list)"),
+        page: z
+          .number()
+          .optional()
+          .default(1)
+          .describe("Pagination page number (default: 1)"),
+        per_page: z
+          .number()
+          .optional()
+          .default(30)
+          .describe("Number of articles per page (default: 30, max: 1000)"),
+        search_fields: z
+          .string()
+          .optional()
+          .describe(
+            "Comma-separated list of fields to search (title, body_text, tag_list)",
+          ),
       },
     },
-    async (args) => await devToAPI.searchArticles(args)
+    async (args) => await devToAPI.searchArticles(args),
   );
 
   return server;
@@ -126,7 +160,7 @@ const mcpHandler = async (req: express.Request, res: express.Response) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
   // Handle initialization requests (usually POST without session ID)
-  if (req.method === "POST" && (!sessionId && isInitializeRequest(req.body))) {
+  if (req.method === "POST" && !sessionId && isInitializeRequest(req.body)) {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (sessionId) => {
@@ -149,7 +183,9 @@ const mcpHandler = async (req: express.Request, res: express.Response) => {
 
   // Handle case where no session ID is provided for non-init requests
   if (req.method === "POST" && !sessionId) {
-    res.status(400).json({ error: "Session ID required for non-initialization requests" });
+    res
+      .status(400)
+      .json({ error: "Session ID required for non-initialization requests" });
     return;
   }
 
@@ -161,11 +197,11 @@ const mcpHandler = async (req: express.Request, res: express.Response) => {
 
   // For GET requests without session, return server info
   if (req.method === "GET") {
-    res.json({ 
+    res.json({
       name: "dev-to-mcp",
       version: "1.0.0",
       description: "MCP server for dev.to public API",
-      capabilities: ["tools"]
+      capabilities: ["tools"],
     });
   }
 };
@@ -176,7 +212,7 @@ app.get("/mcp", mcpHandler);
 
 async function main() {
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-  
+
   app.listen(port, () => {
     console.log(`Dev.to MCP Server running on port ${port}`);
   });

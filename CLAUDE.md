@@ -14,6 +14,10 @@ npm run dev
 # Start the production server
 npm start
 
+# Testing
+npm test               # Run tests with vitest in watch mode
+npm run test:ci        # Run tests once with JSON output for CI
+
 # Code quality
 npm run lint           # Check for linting issues
 npm run lint:fix       # Fix auto-fixable linting issues
@@ -56,6 +60,14 @@ The server exposes these tools to MCP clients:
 - External dependency: `@modelcontextprotocol/sdk` (not bundled)
 - Source alias `@` points to `src/` directory
 - Output goes to `dist/` directory
+
+### Testing
+
+- Uses Vitest as the test runner and framework
+- Test files should be placed alongside source files with `.test.ts` extension
+- Vitest provides built-in TypeScript support and ES modules compatibility
+- Run `npm test` for watch mode development testing
+- Run `npm run test:ci` for CI/automated testing with JSON output
 
 ### Code Style
 

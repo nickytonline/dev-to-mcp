@@ -5,6 +5,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { DevToAPI } from "./devto-api.ts";
+import { createTextResult } from "./lib/utils.ts";
 
 const getServer = () => {
   const server = new McpServer({
@@ -45,7 +46,10 @@ const getServer = () => {
           .describe("Filter by article state"),
       },
     },
-    async (args) => await devToAPI.getArticles(args),
+    async (args) => {
+      const data = await devToAPI.getArticles(args);
+      return createTextResult(data);
+    },
   );
 
   server.registerTool(
@@ -65,7 +69,8 @@ const getServer = () => {
       if (!args.id && !args.path) {
         throw new Error("Either id or path must be provided");
       }
-      return await devToAPI.getArticle(args);
+      const data = await devToAPI.getArticle(args);
+      return createTextResult(data);
     },
   );
 
@@ -83,7 +88,8 @@ const getServer = () => {
       if (!args.id && !args.username) {
         throw new Error("Either id or username must be provided");
       }
-      return await devToAPI.getUser(args);
+      const data = await devToAPI.getUser(args);
+      return createTextResult(data);
     },
   );
 
@@ -105,7 +111,10 @@ const getServer = () => {
           .describe("Number of tags per page (default: 10, max: 1000)"),
       },
     },
-    async (args) => await devToAPI.getTags(args),
+    async (args) => {
+      const data = await devToAPI.getTags(args);
+      return createTextResult(data);
+    },
   );
 
   server.registerTool(
@@ -117,7 +126,10 @@ const getServer = () => {
         article_id: z.number().describe("Article ID to get comments for"),
       },
     },
-    async (args) => await devToAPI.getComments(args),
+    async (args) => {
+      const data = await devToAPI.getComments(args);
+      return createTextResult(data);
+    },
   );
 
   server.registerTool(
@@ -145,7 +157,10 @@ const getServer = () => {
           ),
       },
     },
-    async (args) => await devToAPI.searchArticles(args),
+    async (args) => {
+      const data = await devToAPI.searchArticles(args);
+      return createTextResult(data);
+    },
   );
 
   return server;

@@ -1,4 +1,3 @@
-import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 interface GetArticlesArgs {
   username?: string;
@@ -38,24 +37,15 @@ export class DevToAPI {
     return queryString ? `?${queryString}` : "";
   }
 
-  async getArticles(args: GetArticlesArgs = {}): Promise<CallToolResult> {
+  async getArticles(args: GetArticlesArgs = {}): Promise<unknown> {
     const queryString = this.#buildQueryString(args);
-    const data = await this.#makeRequest(`/articles${queryString}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+    return await this.#makeRequest(`/articles${queryString}`);
   }
 
   async getArticle(args: {
     id?: number;
     path?: string;
-  }): Promise<CallToolResult> {
+  }): Promise<unknown> {
     let endpoint: string;
 
     if (args.id) {
@@ -66,22 +56,13 @@ export class DevToAPI {
       throw new Error("Either id or path must be provided");
     }
 
-    const data = await this.#makeRequest(endpoint);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+    return await this.#makeRequest(endpoint);
   }
 
   async getUser(args: {
     id?: number;
     username?: string;
-  }): Promise<CallToolResult> {
+  }): Promise<unknown> {
     let endpoint: string;
 
     if (args.id) {
@@ -92,45 +73,18 @@ export class DevToAPI {
       throw new Error("Either id or username must be provided");
     }
 
-    const data = await this.#makeRequest(endpoint);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+    return await this.#makeRequest(endpoint);
   }
 
   async getTags(
     args: { page?: number; per_page?: number } = {},
-  ): Promise<CallToolResult> {
+  ): Promise<unknown> {
     const queryString = this.#buildQueryString(args);
-    const data = await this.#makeRequest(`/tags${queryString}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+    return await this.#makeRequest(`/tags${queryString}`);
   }
 
-  async getComments(args: { article_id: number }): Promise<CallToolResult> {
-    const data = await this.#makeRequest(`/comments?a_id=${args.article_id}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+  async getComments(args: { article_id: number }): Promise<unknown> {
+    return await this.#makeRequest(`/comments?a_id=${args.article_id}`);
   }
 
   async searchArticles(args: {
@@ -138,17 +92,8 @@ export class DevToAPI {
     page?: number;
     per_page?: number;
     search_fields?: string;
-  }): Promise<CallToolResult> {
+  }): Promise<unknown> {
     const queryString = this.#buildQueryString(args);
-    const data = await this.#makeRequest(`/search/feed_content${queryString}`);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(data, null, 2),
-        },
-      ],
-    };
+    return await this.#makeRequest(`/search/feed_content${queryString}`);
   }
 }

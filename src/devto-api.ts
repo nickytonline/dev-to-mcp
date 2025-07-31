@@ -1,7 +1,21 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+
+interface GetArticlesArgs {
+  username?: string;
+  tag?: string;
+  tags?: string;
+  tags_exclude?: string;
+  state?: "fresh" | "rising" | "all";
+  top?: number;
+  page?: number;
+  per_page?: number;
+  collection_id?: number;
+}
+
 export class DevToAPI {
   #baseUrl = "https://dev.to/api";
 
-  async #makeRequest(endpoint: string): Promise<any> {
+  async #makeRequest(endpoint: string): Promise<unknown> {
     const response = await fetch(`${this.#baseUrl}${endpoint}`);
 
     if (!response.ok) {
@@ -11,7 +25,7 @@ export class DevToAPI {
     return response.json();
   }
 
-  #buildQueryString(params: Record<string, any>): string {
+  #buildQueryString(params: GetArticlesArgs): string {
     const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
@@ -24,7 +38,7 @@ export class DevToAPI {
     return queryString ? `?${queryString}` : "";
   }
 
-  async getArticles(args: any = {}) {
+  async getArticles(args: GetArticlesArgs = {}): Promise<CallToolResult> {
     const queryString = this.#buildQueryString(args);
     const data = await this.#makeRequest(`/articles${queryString}`);
 
@@ -38,7 +52,10 @@ export class DevToAPI {
     };
   }
 
-  async getArticle(args: { id?: number; path?: string }) {
+  async getArticle(args: {
+    id?: number;
+    path?: string;
+  }): Promise<CallToolResult> {
     let endpoint: string;
 
     if (args.id) {
@@ -61,7 +78,10 @@ export class DevToAPI {
     };
   }
 
-  async getUser(args: { id?: number; username?: string }) {
+  async getUser(args: {
+    id?: number;
+    username?: string;
+  }): Promise<CallToolResult> {
     let endpoint: string;
 
     if (args.id) {
@@ -84,7 +104,9 @@ export class DevToAPI {
     };
   }
 
-  async getTags(args: { page?: number; per_page?: number } = {}) {
+  async getTags(
+    args: { page?: number; per_page?: number } = {},
+  ): Promise<CallToolResult> {
     const queryString = this.#buildQueryString(args);
     const data = await this.#makeRequest(`/tags${queryString}`);
 
@@ -98,7 +120,7 @@ export class DevToAPI {
     };
   }
 
-  async getComments(args: { article_id: number }) {
+  async getComments(args: { article_id: number }): Promise<CallToolResult> {
     const data = await this.#makeRequest(`/comments?a_id=${args.article_id}`);
 
     return {
@@ -116,7 +138,7 @@ export class DevToAPI {
     page?: number;
     per_page?: number;
     search_fields?: string;
-  }) {
+  }): Promise<CallToolResult> {
     const queryString = this.#buildQueryString(args);
     const data = await this.#makeRequest(`/search/feed_content${queryString}`);
 

@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import { resolve } from "path";
 
 export default defineConfig(({ command }) => ({
-  // Build configuration
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),

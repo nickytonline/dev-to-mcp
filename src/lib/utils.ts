@@ -1,9 +1,9 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 /**
- * Creates a CallToolResult with text content from any data
- * @param data - The data to stringify and include in the result
- * @returns A properly formatted CallToolResult
+ * Creates a CallToolResult with a text content block containing the JSON stringified data.
+ * @param data - The data to be included in the text content block.
+ * @returns A CallToolResult object with the text content block.
  */
 export function createTextResult(data: unknown): CallToolResult {
   return {

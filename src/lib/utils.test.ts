@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { createTextResult } from "./utils.ts";
 
 describe("createTextResult", () => {
-  // Mock data based on actual dev.to API responses
   const mockUser = {
     type_of: "user",
     id: 9597,

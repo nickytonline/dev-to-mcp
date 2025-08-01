@@ -1,3 +1,4 @@
+import { logger } from "./logger.ts";
 
 interface GetArticlesArgs {
   username?: string;
@@ -15,13 +16,27 @@ export class DevToAPI {
   #baseUrl = "https://dev.to/api";
 
   async #makeRequest(endpoint: string): Promise<unknown> {
-    const response = await fetch(`${this.#baseUrl}${endpoint}`);
+    const url = `${this.#baseUrl}${endpoint}`;
+    logger.debug({ url }, "Making API request");
+    
+    try {
+      const response = await fetch(url);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        logger.error({ 
+          url, 
+          status: response.status, 
+          statusText: response.statusText 
+        }, "API request failed");
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      logger.debug({ url, status: response.status }, "API request successful");
+      return response.json();
+    } catch (error) {
+      logger.error({ url, error }, "API request error");
+      throw error;
     }
-
-    return response.json();
   }
 
   #buildQueryString(params: GetArticlesArgs): string {

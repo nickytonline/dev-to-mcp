@@ -6,6 +6,8 @@ import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { DevToAPI } from "./devto-api.ts";
 import { createTextResult } from "./lib/utils.ts";
+import { logger } from "./logger.ts";
+import { getConfig } from "./config.ts";
 
 const getServer = () => {
   const server = new McpServer({
@@ -47,8 +49,15 @@ const getServer = () => {
       },
     },
     async (args) => {
-      const data = await devToAPI.getArticles(args);
-      return createTextResult(data);
+      logger.info({ args }, "Getting articles");
+      try {
+        const data = await devToAPI.getArticles(args);
+        logger.debug({ articlesCount: Array.isArray(data) ? data.length : 'unknown' }, "Articles retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get articles");
+        throw error;
+      }
     },
   );
 
@@ -66,11 +75,19 @@ const getServer = () => {
       },
     },
     async (args) => {
+      logger.info({ args }, "Getting article");
       if (!args.id && !args.path) {
+        logger.error({ args }, "Neither id nor path provided for get_article");
         throw new Error("Either id or path must be provided");
       }
-      const data = await devToAPI.getArticle(args);
-      return createTextResult(data);
+      try {
+        const data = await devToAPI.getArticle(args);
+        logger.debug({ articleId: args.id, articlePath: args.path }, "Article retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get article");
+        throw error;
+      }
     },
   );
 
@@ -85,11 +102,19 @@ const getServer = () => {
       },
     },
     async (args) => {
+      logger.info({ args }, "Getting user");
       if (!args.id && !args.username) {
+        logger.error({ args }, "Neither id nor username provided for get_user");
         throw new Error("Either id or username must be provided");
       }
-      const data = await devToAPI.getUser(args);
-      return createTextResult(data);
+      try {
+        const data = await devToAPI.getUser(args);
+        logger.debug({ userId: args.id, username: args.username }, "User retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get user");
+        throw error;
+      }
     },
   );
 
@@ -112,8 +137,15 @@ const getServer = () => {
       },
     },
     async (args) => {
-      const data = await devToAPI.getTags(args);
-      return createTextResult(data);
+      logger.info({ args }, "Getting tags");
+      try {
+        const data = await devToAPI.getTags(args);
+        logger.debug({ tagsCount: Array.isArray(data) ? data.length : 'unknown' }, "Tags retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get tags");
+        throw error;
+      }
     },
   );
 
@@ -127,8 +159,15 @@ const getServer = () => {
       },
     },
     async (args) => {
-      const data = await devToAPI.getComments(args);
-      return createTextResult(data);
+      logger.info({ args }, "Getting comments");
+      try {
+        const data = await devToAPI.getComments(args);
+        logger.debug({ commentsCount: Array.isArray(data) ? data.length : 'unknown' }, "Comments retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get comments");
+        throw error;
+      }
     },
   );
 
@@ -158,8 +197,15 @@ const getServer = () => {
       },
     },
     async (args) => {
-      const data = await devToAPI.searchArticles(args);
-      return createTextResult(data);
+      logger.info({ args }, "Searching articles");
+      try {
+        const data = await devToAPI.searchArticles(args);
+        logger.debug({ resultsCount: Array.isArray(data) ? data.length : 'unknown' }, "Article search completed");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to search articles");
+        throw error;
+      }
     },
   );
 
@@ -174,11 +220,12 @@ const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 const mcpHandler = async (req: express.Request, res: express.Response) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
-  // Handle initialization requests (usually POST without session ID)
   if (req.method === "POST" && !sessionId && isInitializeRequest(req.body)) {
+    logger.info("Initializing new MCP session");
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (sessionId) => {
+        logger.info({ sessionId }, "MCP session initialized");
         transports[sessionId] = transport;
       },
     });
@@ -189,28 +236,26 @@ const mcpHandler = async (req: express.Request, res: express.Response) => {
     return;
   }
 
-  // Handle existing session requests
   if (sessionId && transports[sessionId]) {
+    logger.debug({ sessionId }, "Handling request for existing session");
     const transport = transports[sessionId];
     await transport.handleRequest(req, res, req.body);
     return;
   }
 
-  // Handle case where no session ID is provided for non-init requests
   if (req.method === "POST" && !sessionId) {
+    logger.warn("POST request without session ID for non-initialization request");
     res
       .status(400)
       .json({ error: "Session ID required for non-initialization requests" });
     return;
   }
 
-  // Handle unknown session
   if (sessionId && !transports[sessionId]) {
+    logger.warn({ sessionId }, "Request for unknown session");
     res.status(404).json({ error: "Session not found" });
     return;
   }
-
-  // For GET requests without session, return server info
   if (req.method === "GET") {
     res.json({
       name: "dev-to-mcp",
@@ -221,19 +266,19 @@ const mcpHandler = async (req: express.Request, res: express.Response) => {
   }
 };
 
-// Handle MCP requests on /mcp endpoint
 app.post("/mcp", mcpHandler);
 app.get("/mcp", mcpHandler);
 
 async function main() {
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+  const config = getConfig();
+  const port = config.PORT;
 
   app.listen(port, () => {
-    console.log(`Dev.to MCP Server running on port ${port}`);
+    logger.info({ port, environment: config.NODE_ENV }, "Dev.to MCP Server started");
   });
 }
 
 main().catch((error) => {
-  console.error("Server error:", error);
+  logger.error({ error }, "Server startup failed");
   process.exit(1);
 });

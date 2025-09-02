@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/nickytonline-dev-to-mcp-badge.png)](https://mseep.ai/app/nickytonline-dev-to-mcp)
+
 # Dev.to MCP Server
 
 A remote Model Context Protocol (MCP) server for interacting with the dev.to public API without requiring authentication.

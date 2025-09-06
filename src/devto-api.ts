@@ -13,21 +13,29 @@ interface GetArticlesArgs {
 }
 
 export class DevToAPI {
-  #baseUrl = "https://dev.to/api";
+  #baseUrl: URL;
 
-  async #makeRequest(endpoint: string): Promise<unknown> {
-    const url = `${this.#baseUrl}${endpoint}`;
+  constructor(baseURL = "https://dev.to/api/") {
+    // Ensure the base URL ends with a slash for proper relative URL construction
+    const normalizedBaseURL = baseURL.endsWith("/") ? baseURL : `${baseURL}/`;
+    this.#baseUrl = new URL(normalizedBaseURL);
+  }
+
+  async #makeRequest(url: URL): Promise<unknown> {
     logger.debug({ url }, "Making API request");
-    
+
     try {
       const response = await fetch(url);
 
       if (!response.ok) {
-        logger.error({ 
-          url, 
-          status: response.status, 
-          statusText: response.statusText 
-        }, "API request failed");
+        logger.error(
+          {
+            url,
+            status: response.status,
+            statusText: response.statusText,
+          },
+          "API request failed",
+        );
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
@@ -39,34 +47,34 @@ export class DevToAPI {
     }
   }
 
-  #buildQueryString(params: GetArticlesArgs): string {
-    const searchParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
+  async getArticles(args: GetArticlesArgs = {}): Promise<unknown> {
+    const url = new URL("articles", this.#baseUrl);
+    Object.entries(args).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        searchParams.append(key, String(value));
+        url.searchParams.append(key, String(value));
       }
     });
-
-    const queryString = searchParams.toString();
-    return queryString ? `?${queryString}` : "";
+    return await this.#makeRequest(url);
   }
 
-  async getArticles(args: GetArticlesArgs = {}): Promise<unknown> {
-    const queryString = this.#buildQueryString(args);
-    return await this.#makeRequest(`/articles${queryString}`);
-  }
-
-  async getArticle(args: {
-    id?: number;
-    path?: string;
-  }): Promise<unknown> {
-    let endpoint: string;
+  async getArticle(args: { id?: number; path?: string }): Promise<unknown> {
+    let endpoint: URL;
 
     if (args.id) {
-      endpoint = `/articles/${args.id}`;
+      // Validate ID is a positive integer
+      if (!Number.isInteger(args.id) || args.id <= 0) {
+        throw new Error("Article ID must be a positive integer");
+      }
+      endpoint = new URL(
+        `articles/${encodeURIComponent(args.id)}`,
+        this.#baseUrl,
+      );
     } else if (args.path) {
-      endpoint = `/articles/${args.path}`;
+      // Sanitize path parameter
+      endpoint = new URL(
+        `articles/${encodeURIComponent(args.path)}`,
+        this.#baseUrl,
+      );
     } else {
       throw new Error("Either id or path must be provided");
     }
@@ -74,16 +82,18 @@ export class DevToAPI {
     return await this.#makeRequest(endpoint);
   }
 
-  async getUser(args: {
-    id?: number;
-    username?: string;
-  }): Promise<unknown> {
-    let endpoint: string;
+  async getUser(args: { id?: number; username?: string }): Promise<unknown> {
+    let endpoint: URL;
 
     if (args.id) {
-      endpoint = `/users/${args.id}`;
+      // Validate ID is a positive integer
+      if (!Number.isInteger(args.id) || args.id <= 0) {
+        throw new Error("User ID must be a positive integer");
+      }
+      endpoint = new URL(`users/${encodeURIComponent(args.id)}`, this.#baseUrl);
     } else if (args.username) {
-      endpoint = `/users/by_username?url=${args.username}`;
+      endpoint = new URL("users/by_username", this.#baseUrl);
+      endpoint.searchParams.set("url", args.username);
     } else {
       throw new Error("Either id or username must be provided");
     }
@@ -94,12 +104,24 @@ export class DevToAPI {
   async getTags(
     args: { page?: number; per_page?: number } = {},
   ): Promise<unknown> {
-    const queryString = this.#buildQueryString(args);
-    return await this.#makeRequest(`/tags${queryString}`);
+    const url = new URL("tags", this.#baseUrl);
+    Object.entries(args).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, String(value));
+      }
+    });
+    return await this.#makeRequest(url);
   }
 
   async getComments(args: { article_id: number }): Promise<unknown> {
-    return await this.#makeRequest(`/comments?a_id=${args.article_id}`);
+    // Validate article_id is a positive integer
+    if (!Number.isInteger(args.article_id) || args.article_id <= 0) {
+      throw new Error("Article ID must be a positive integer");
+    }
+
+    const url = new URL("comments", this.#baseUrl);
+    url.searchParams.set("a_id", String(args.article_id));
+    return await this.#makeRequest(url);
   }
 
   async searchArticles(args: {
@@ -108,7 +130,12 @@ export class DevToAPI {
     per_page?: number;
     search_fields?: string;
   }): Promise<unknown> {
-    const queryString = this.#buildQueryString(args);
-    return await this.#makeRequest(`/search/feed_content${queryString}`);
+    const url = new URL("search/feed_content", this.#baseUrl);
+    Object.entries(args).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, String(value));
+      }
+    });
+    return await this.#makeRequest(url);
   }
 }

@@ -65,10 +65,7 @@ export class DevToAPI {
       if (!Number.isInteger(args.id) || args.id <= 0) {
         throw new Error("Article ID must be a positive integer");
       }
-      endpoint = new URL(
-        `articles/${encodeURIComponent(args.id)}`,
-        this.#baseUrl,
-      );
+      endpoint = new URL(`articles/${args.id}`, this.#baseUrl);
     } else if (args.path) {
       // Sanitize path parameter
       endpoint = new URL(
@@ -90,7 +87,7 @@ export class DevToAPI {
       if (!Number.isInteger(args.id) || args.id <= 0) {
         throw new Error("User ID must be a positive integer");
       }
-      endpoint = new URL(`users/${encodeURIComponent(args.id)}`, this.#baseUrl);
+      endpoint = new URL(`users/${args.id}`, this.#baseUrl);
     } else if (args.username) {
       endpoint = new URL("users/by_username", this.#baseUrl);
       endpoint.searchParams.set("url", args.username);

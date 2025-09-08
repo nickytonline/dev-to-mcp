@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "vite build",
+    "build:netlify": "vite build --config vite.netlify.config.ts",
     "dev": "node --experimental-strip-types --watch src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest",

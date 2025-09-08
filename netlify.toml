@@ -1,0 +1,11 @@
+[build]
+command = "npm run build:netlify"
+functions = "netlify/functions"
+
+[functions]
+node_bundler = "nft"
+
+[dev]
+command = "npm run dev"
+port = 3000
+functions = "netlify/functions"

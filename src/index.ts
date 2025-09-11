@@ -23,6 +23,10 @@ const getServer = () => {
       title: "Get Articles",
       description:
         "Get articles from dev.to. Can filter by username, tag, or other parameters.",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         username: z.string().optional().describe("Filter articles by username"),
         tag: z.string().optional().describe("Filter articles by tag"),
@@ -66,6 +70,10 @@ const getServer = () => {
     {
       title: "Get Article",
       description: "Get a specific article by ID or path",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         id: z.number().optional().describe("Article ID"),
         path: z
@@ -96,6 +104,10 @@ const getServer = () => {
     {
       title: "Get User",
       description: "Get user information by ID or username",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         id: z.number().optional().describe("User ID"),
         username: z.string().optional().describe("Username"),
@@ -123,6 +135,10 @@ const getServer = () => {
     {
       title: "Get Tags",
       description: "Get popular tags from dev.to",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         page: z
           .number()
@@ -154,6 +170,10 @@ const getServer = () => {
     {
       title: "Get Comments",
       description: "Get comments for a specific article",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         article_id: z.number().describe("Article ID to get comments for"),
       },
@@ -176,6 +196,10 @@ const getServer = () => {
     {
       title: "Search Articles",
       description: "Search articles using query parameters",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
       inputSchema: {
         q: z.string().describe("Search query"),
         page: z

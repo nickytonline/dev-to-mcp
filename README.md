@@ -11,6 +11,7 @@ This MCP server provides access to the following dev.to public API endpoints:
 - **get_user** - Get user information by ID or username
 - **get_tags** - Get popular tags from dev.to
 - **get_comments** - Get comments for a specific article
+- **get_nickytonline_latest_posts** - Get nickytonline's latest blog posts (convenience tool)
 - **search_articles** - Search articles using query parameters
 
 ## Installation
@@ -113,6 +114,10 @@ Get popular tags:
 ### get_comments
 Get comments for an article:
 - `article_id` - Article ID (required)
+
+### get_nickytonline_latest_posts
+Get nickytonline's latest blog posts:
+- `per_page` - Number of articles to retrieve (default: 10, max: 1000)
 
 ### search_articles
 Search articles:

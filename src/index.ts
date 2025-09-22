@@ -233,6 +233,40 @@ const getServer = () => {
     },
   );
 
+  server.registerTool(
+    "get_nickytonline_latest_posts",
+    {
+      title: "Get nickytonline's Latest Blog Posts",
+      description: "Get the latest blog posts from nickytonline on dev.to",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true
+      },
+      inputSchema: {
+        per_page: z
+          .number()
+          .optional()
+          .default(10)
+          .describe("Number of articles to retrieve (default: 10, max: 1000)"),
+      },
+    },
+    async (args) => {
+      logger.info({ args }, "Getting nickytonline's latest posts");
+      try {
+        const data = await devToAPI.getArticles({
+          username: "nickytonline",
+          per_page: args.per_page || 10,
+          state: "all"
+        });
+        logger.debug({ articlesCount: Array.isArray(data) ? data.length : 'unknown' }, "nickytonline's articles retrieved");
+        return createTextResult(data);
+      } catch (error) {
+        logger.error({ error, args }, "Failed to get nickytonline's articles");
+        throw error;
+      }
+    },
+  );
+
   return server;
 };
 

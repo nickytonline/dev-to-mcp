@@ -72,10 +72,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Update Docker Hub description from README.md
+      - name: Update Docker Hub description + short desc
         uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           readme-filepath: ./README.md
+          short-description: ${{ github.event.repository.description || '' }}

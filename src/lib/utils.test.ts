@@ -9,17 +9,19 @@ describe("createTextResult", () => {
     name: "Nick Taylor",
     twitter_username: null,
     github_username: "nickytonline",
-    summary: "I'm a fan of Open Source and have a growing interest in serverless and edge computing.",
+    summary:
+      "I'm a fan of Open Source and have a growing interest in serverless and edge computing.",
     location: "Montréal, Québec, Canada",
     website_url: "https://OneTipAWeek.com",
-    joined_at: "Mar 11, 2017"
+    joined_at: "Mar 11, 2017",
   };
 
   const mockArticle = {
     type_of: "article",
     id: 2729716,
     title: "Introducing the dev.to MCP server",
-    description: "If you've been wondering how to get your AI tools talking to dev.to's content...",
+    description:
+      "If you've been wondering how to get your AI tools talking to dev.to's content...",
     slug: "introducing-the-devto-mcp-server-42jg",
     path: "/nickytonline/introducing-the-devto-mcp-server-42jg",
     comments_count: 16,
@@ -28,8 +30,8 @@ describe("createTextResult", () => {
     user: {
       name: "Nick Taylor",
       username: "nickytonline",
-      user_id: 9597
-    }
+      user_id: 9597,
+    },
   };
 
   const mockTag = {
@@ -37,7 +39,7 @@ describe("createTextResult", () => {
     name: "react",
     bg_color_hex: "#61dafb",
     text_color_hex: "#000000",
-    short_summary: "A JavaScript library for building user interfaces"
+    short_summary: "A JavaScript library for building user interfaces",
   };
 
   it("should create a CallToolResult with correct structure", () => {
@@ -62,7 +64,9 @@ describe("createTextResult", () => {
     const result = createTextResult(mockArticle);
 
     expect(result.content[0].type).toBe("text");
-    expect(result.content[0].text).toContain('"title": "Introducing the dev.to MCP server"');
+    expect(result.content[0].text).toContain(
+      '"title": "Introducing the dev.to MCP server"',
+    );
     expect(result.content[0].text).toContain('"tag_list"');
   });
 
